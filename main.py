@@ -132,7 +132,7 @@ def upsert_nodedb(packet):
         'longName': Long_Name,
         'shortName': Short_Name,
         'macaddr': MacAddr,
-        'HarhwModel': Hardware_Model
+        'hwModel': Hardware_Model
     }, node.num == node_num)
 
     NodeActivities.insert({

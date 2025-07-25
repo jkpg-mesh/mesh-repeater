@@ -27,7 +27,7 @@ class dbsync:
                         'longName': user.get('longName',''),
                         'shortName': user.get('shortName',''),
                         'macaddr': user.get('macaddr',''),
-                        'HarhwModel': user.get('hwModel','')
+                        'hwModel': user.get('hwModel','')
                     }, nodeQ.num == node.get('num'))
                 counter=0
             counter += 1
