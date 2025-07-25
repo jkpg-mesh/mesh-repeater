@@ -11,9 +11,6 @@ with the ability to add additional modules or functions.
 
 Run this on a PC or Raspberry Pi connected to a Meshtastic device over USB.
 
-Requirements:
-- meshtastic
-
 The NodeBD and related functions are created since the device nodedb can only store 
 100 nodes and then its starts writting over the oldest nodes.  In addition the 
 last heard is controlled by the repeater app.
@@ -21,7 +18,7 @@ last heard is controlled by the repeater app.
 
 import json, logging, os, threading, time
 import meshtastic, meshtastic.serial_interface
-from datetime import datetime
+from datetime import datetime, timedelta
 from tinydb import TinyDB, Query
 from pubsub import pub
 from rich.console import Console
@@ -104,7 +101,7 @@ def init_config():
 def init_db():
     global Nodes, NodeActivities
 
-    db = TinyDB('db/nodedb.json')
+    db = TinyDB(config.get('database_path', ''))
     Nodes = db.table('Nodes')
     NodeActivities = db.table('NodeActivities')
 
@@ -121,22 +118,28 @@ def upsert_nodedb(packet):
     decoded = packet.get('decoded')
     user_data = decoded.get('user',{})
 
+    node_num = packet.get('from')
     node_id = packet.get('fromId')
     Long_Name = user_data.get('longName', '')
     Short_Name = user_data.get('shortName', '')
+    MacAddr = user_data.get('macaddr', '')
     Hardware_Model = user_data.get('hwModel', '')
+    node_activity = packet['decoded']['portnum']
 
     Nodes.upsert({
+        'num': node_num,
         'id': node_id,
-        'Long_Name': Long_Name,
-        'Short_Name': Short_Name,
-        'Hardware_Model': Hardware_Model,
-        'Last_Heard': Activity_Time
-    }, node.id == node_id)
+        'longName': Long_Name,
+        'shortName': Short_Name,
+        'macaddr': MacAddr,
+        'HarhwModel': Hardware_Model
+    }, node.num == node_num)
 
     NodeActivities.insert({
+        'Num': node_num,
         'id': node_id,
-        'Time_Heard': Activity_Time
+        'Time_Heard': Activity_Time,
+        'Activity': node_activity
     })
 
 def upsert_nodedb_activity(packet):
@@ -153,7 +156,7 @@ def upsert_nodedb_activity(packet):
 
 # init thr additional modules
 def init_modules():
-    syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface)
+    syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface, freq=config.get('sync_frequency', 7200))
     thread1 = threading.Thread(target=syncer.run, daemon=True)
     thread1.start()
     logging.info("Initialized Modules...")
@@ -174,7 +177,6 @@ def command_handler(packet):
         case "/info":
             msg = "Welcome to jkpg-mesh! Available commands:\n"
             msg = msg+ "/users - online users\n"
-            msg = msg+ "/register - log node in database\n"
             msg = msg+ "/signal - get signal report\n"
             msg = msg+ "Please wait 10sec before sending sending cmd."
             return msg
@@ -192,6 +194,25 @@ def command_handler(packet):
                 snr_msg = "--.-- dB"
             msg = f"Repeater received you RSSI: {rssi_msg}  Received SNR: {snr_msg}"
             return msg
+        case "/users":
+            # Get all nodes active last few minutes from the database and format the return message
+            msg = "Recent users:\n"
+            nodesAct = Query()
+            future_time = datetime.now() - timedelta(minutes=config.get('active_users', 10))
+            formatted = future_time.strftime('%Y%m%d_%H%M%S')
+            results = NodeActivities.search(nodesAct.Time_Heard >= formatted)
+            unique_nums = list({entry['Num'] for entry in results if 'Num' in entry})
+
+            for num in unique_nums:
+                nodes = Query()
+                node_info = Nodes.search(nodes.num == num)
+                for match in node_info:
+                    line = f"{match.get('shortName', 'Unknown Node')}\n"
+                    if len(msg) + len(line) <= 200:
+                        msg += line
+                    else:
+                        break  # stop adding if we reach the limit
+            return msg
         case _:
             return None
 
@@ -208,7 +229,7 @@ def onReceive(packet, interface):
             case "TEXT_MESSAGE_APP":
                 fromId = packet['fromId']
                 body = packet['decoded']['text']
-                logging.info(f"Text package message: {body}")
+                logging.debug(f"Text package message: {body}")
                 upsert_nodedb_activity(packet)
                 msg = command_handler(packet)
                 if msg != None:
@@ -247,7 +268,7 @@ def onConnectionLost(interface):
 
 # Send a message to a specific node
 def sendMessage(interface, toID, message):
-    logging.info(f"Sending message to {toID}: {message}")
+    logging.debug(f"Sending message to {toID}: {message}")
     interface.sendText(text=message, destinationId=toID)
 
 # init Meshtastic

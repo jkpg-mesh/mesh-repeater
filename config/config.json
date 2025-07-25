@@ -1,3 +1,10 @@
 {
-    
+    "version": "1.0.0",
+    "version_desc": "Version of the configuration file",
+    "active_users": 600,
+    "active_users_desc": "Time in seconds to consider a user active",
+    "database_path": "db/nodedb.json",
+    "database_path_desc": "Path to the database file", 
+    "sync_frequency": 3600, 
+    "sync_frequency_desc": "Frequency in seconds to sync the database"
 }
