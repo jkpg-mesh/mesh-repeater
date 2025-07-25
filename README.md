@@ -12,3 +12,6 @@ Run this on a PC or Raspberry Pi connected to a Meshtastic device over USB.
 
 ## Requirements:
 - meshtastic
+- tinydb
+- rich
+- pubsub
