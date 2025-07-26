@@ -1,10 +1,17 @@
 {
-    "version": "1.0.0",
     "version_desc": "Version of the configuration file",
-    "active_users": 600,
+    "version": "1.0.0",
     "active_users_desc": "Time in seconds to consider a user active",
+    "active_users": 600,
+    "database_path_desc": "Path to the database file",
     "database_path": "db/nodedb.json",
-    "database_path_desc": "Path to the database file", 
-    "sync_frequency": 3600, 
-    "sync_frequency_desc": "Frequency in seconds to sync the database"
+    "sync_frequency_desc": "Frequency in seconds to sync the database",
+    "sync_frequency": 3600,
+    "repearter_lat/lon_desc": "Latitude and Longitude for the repeater",
+    "repeatar_lat": 0.0,
+    "repeater_lon": 0.0,
+    "broadcast_message_desc": "Message to broadcast",
+    "broadcast_message": "Good day in J\u00f6nk\u00f6ping, for more information visit https://jkpg-mesh.github.io/",
+    "broadcast_freq_desc": "Frequency in seconds to broadcast the message",
+    "broadcast_freq": 300
 }

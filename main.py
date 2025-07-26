@@ -27,6 +27,8 @@ from rich.text import Text
 from rich import box
 
 import modules.dbSync as dbSync
+import modules.broadcast as broadcast
+import tools.general as general_tools
 
 # startup dialog functions 
 def clear_screen():
@@ -64,8 +66,8 @@ def init_startup_screen():
                          border_style="green", expand=False))
 
 # convert node id to hex number 
-def idToHex(nodeId):
-    return '!' + hex(nodeId)[2:]
+def numToHex(node_num):
+    return '!' + hex(node_num)[2:]
 
 # init the logging function
 def init_logging():
@@ -78,14 +80,25 @@ def init_logging():
 # Load configuration
 def loadConfig(path='config/config.json'):
     try:
-        with open(path, 'r') as f:
+        with open(path, 'r',encoding="utf-8") as f:
             config = json.load(f)
             return config
     except Exception as e:
         logging.error(f"Failed to load config: {e}")
         console.print(f"[bold red]❌[/bold red]  Initialized configuration...")
         return None
-    
+
+# Save configuration
+def saveConfig(config, path='config/config.json'):
+    try:
+        with open(path, 'w',encoding="utf-8") as f:
+            json.dump(config, f, indent=4)
+            logging.info("Configuration saved successfully...")
+            console.print(f"[bold green]✔[/bold green]  Configuration saved successfully...")
+    except Exception as e:
+        logging.error(f"Failed to save config: {e}")
+        console.print(f"[bold red]❌[/bold red]  Failed to save configuration...") 
+
 # init the configuration 
 def init_config():
     global config
@@ -156,9 +169,13 @@ def upsert_nodedb_activity(packet):
 
 # init thr additional modules
 def init_modules():
+    global broadcaster, syncer
     syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface, freq=config.get('sync_frequency', 7200))
     thread1 = threading.Thread(target=syncer.run, daemon=True)
     thread1.start()
+    broadcaster = broadcast.broadcast(interface=interface, freq=config.get('broadcast_freq', 300), msg=config.get('broadcast_message', "Hello Jönköping!"))
+    thread2 = threading.Thread(target=broadcaster.run, daemon=True)
+    thread2.start()
     logging.info("Initialized Modules...")
     console.print(f"[bold green]✔[/bold green]  Initialized Modules...")
 
@@ -212,6 +229,29 @@ def command_handler(packet):
                         msg += line
                     else:
                         break  # stop adding if we reach the limit
+            return msg
+        case "/distance":
+            # calculate the distance from the repeater to the given coordinates
+            try:
+                lat2 = float(args[0])
+                lon2 = float(args[1])
+            except Exception as e:
+                return "Please check format /distance 57.1234 14.1234"
+
+            theTools = general_tools.general()
+            distance = theTools.get_distance(
+                            config.get('repeatar_lat', 0.0),
+                            config.get('repeatar_lon', 0.0),
+                            lat2, 
+                            lon2)
+            return f"Your distance from repeater: {round(distance,2)} km"
+        case "/admin":
+            # Handle admin commands nut how do i do this secure
+            msg = ""
+            admin_cmd = args[0]
+            match admin_cmd:
+                case _:
+                    msg = "Unknown admin command."
             return msg
         case _:
             return None
@@ -303,7 +343,7 @@ def init_meshunit():
 
         logging.info("Meshtastic function started...")
         console.print(f"[bold green]✔[/bold green]  Meshtastic function started...")
-    
+
     except Exception as e:
         # Catch any other unexpected errors during the process
         logging.error(f"An unexpected error occurred: {e}")
@@ -335,6 +375,8 @@ if __name__ == "__main__":
         print(f"An error occurred: {e}")
     finally:
         # This ensures the connection is closed cleanly whether there was an error or not
+        saveConfig(config)
+        console.print(f"[bold green]✔[/bold green]  Saving configuration...")
         logging.info("Closing the Meshtastic interface...")
         console.print(f"[bold green]✔[/bold green]  Closing the Meshtastic interface...")
         interface.close()

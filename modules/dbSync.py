@@ -6,7 +6,7 @@ class dbsync:
     This class updates a local tinydb database  
     """
 
-    def __init__(self, nodesdb=None, interface=None, freq=3600):
+    def __init__(self, nodesdb=None, interface=None, freq=43200):
         self.nodesdb = nodesdb
         self.interface = interface
         self.freq = freq
