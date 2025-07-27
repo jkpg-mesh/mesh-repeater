@@ -73,7 +73,7 @@ def numToHex(node_num):
 # init the logging function
 def init_logging():
     global log_filename
-    log_filename = f"logs/app_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    log_filename = f"logs/system_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     logging.basicConfig(filename=log_filename, level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info("Initialized logging...")
