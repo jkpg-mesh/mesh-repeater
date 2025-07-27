@@ -28,6 +28,7 @@ from rich import box
 
 import modules.dbSync as dbSync
 import modules.broadcast as broadcast
+import modules.WebUI as WebUI
 import tools.general as general_tools
 
 # startup dialog functions 
@@ -176,6 +177,9 @@ def init_modules():
     broadcaster = broadcast.broadcast(interface=interface, freq=config.get('broadcast_freq', 300), msg=config.get('broadcast_message', "Hello Jönköping!"))
     thread2 = threading.Thread(target=broadcaster.run, daemon=True)
     thread2.start()
+    webui = WebUI.WebUI(interface=interface, nodesdb=Nodes)
+    webui_thread = threading.Thread(target=webui.start, daemon=True)
+    webui_thread.start()
     logging.info("Initialized Modules...")
     console.print(f"[bold green]✔[/bold green]  Initialized Modules...")
 

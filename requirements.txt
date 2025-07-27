@@ -2,3 +2,4 @@ meshtastic
 tinydb
 rich
 pubsub
+flask
