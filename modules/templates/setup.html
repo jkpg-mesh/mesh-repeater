@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Setup Page</title>
+    <title>Setup Configuration</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -18,38 +18,39 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
+        h2 {
             color: #0056b3;
+            margin-bottom: 1.5rem;
         }
-        .nav-link {
+        form div {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button[type="submit"] {
             display: inline-block;
-            text-align: center;
             margin-top: 1rem;
             padding: 0.8rem 1.5rem;
             font-weight: bold;
             color: white;
             background-color: #007bff;
-            text-decoration: none;
+            border: none;
             border-radius: 4px;
+            cursor: pointer;
             transition: background-color 0.2s;
         }
-        .nav-link:hover {
+        button[type="submit"]:hover {
             background-color: #0056b3;
-        }
-        textarea {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            resize: vertical;
-            margin-top: 0.5rem;
-        }
-        label {
-            display: block;
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
         }
         .flash-success {
             background-color: #d4edda;
@@ -57,7 +58,7 @@
             border: 1px solid #c3e6cb;
             padding: 1rem;
             border-radius: 4px;
-            margin-bottom: 1.5rem;
+            margin-top: 1.5rem;
         }
         .flash-error, .flash-danger {
             background-color: #f8d7da;
@@ -65,13 +66,23 @@
             border: 1px solid #f5c6cb;
             padding: 1rem;
             border-radius: 4px;
-            margin-bottom: 1.5rem;
+            margin-top: 1.5rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⚙️ Setup Page</h1>
+        <h2>⚙️ Configuration Setup</h2>
+
+        <form method="POST">
+            {% for item in config_items %}
+                <div>
+                    <label for="{{ item.key }}">{{ item.desc }}</label>
+                    <input type="text" id="{{ item.key }}" name="{{ item.key }}" value="{{ item.value }}">
+                </div>
+            {% endfor %}
+            <button type="submit">Save</button>
+        </form>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -80,12 +91,6 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
-        <form method="post">
-            <label for="broadcast_message">Broadcast Message:</label>
-            <textarea name="broadcast_message" id="broadcast_message" rows="4">{{ current_message }}</textarea>
-            <p><input type="submit" value="Save" class="nav-link"></p>
-        </form>
     </div>
 </body>
 </html>

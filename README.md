@@ -10,12 +10,16 @@ It is designed to run on a PC or Raspberry Pi connected to a Meshtastic device v
 Unlike a traditional repeater, this utility periodically broadcasts its presence, synchronizes node information, and provides a web interface for monitoring network activity.  
 It helps the community by serving as a stable, always-on node that announces itself and tracks active users.
 
+![Terminal output](assets/main.png)
+
 ### Key Features
 - **Beacon Functionality:** Periodically broadcasts a customizable message to the mesh.
 - **Node Database:** Stores extended node info and recent activity beyond the device’s built-in limits.
 - **Web UI:** Optional web interface for viewing active nodes and network status.
 - **Command Handling:** Responds to basic commands (e.g., `/info`, `/users`, `/signal`, `/distance`) sent via Meshtastic text messages.
 - **Extensible:** Easily add new modules or features.
+
+![Webinterface](assets/webui.png)
 
 ## Requirements
 - meshtastic

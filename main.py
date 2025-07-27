@@ -171,13 +171,13 @@ def upsert_nodedb_activity(packet):
 # init thr additional modules
 def init_modules():
     global broadcaster, syncer
-    syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface, freq=config.get('sync_frequency', 7200))
+    syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface, freq=int(config.get('sync_frequency', 7200)))
     thread1 = threading.Thread(target=syncer.run, daemon=True)
     thread1.start()
-    broadcaster = broadcast.broadcast(interface=interface, freq=config.get('broadcast_freq', 300), msg=config.get('broadcast_message', "Hello Jönköping!"))
+    broadcaster = broadcast.broadcast(interface=interface, freq=int(config.get('broadcast_freq', 300)), msg=config.get('broadcast_message', "Hello Jönköping!"))
     thread2 = threading.Thread(target=broadcaster.run, daemon=True)
     thread2.start()
-    webui = WebUI.WebUI(interface=interface, nodesdb=Nodes)
+    webui = WebUI.WebUI(interface=interface, nodesdb=Nodes, config=config)
     webui_thread = threading.Thread(target=webui.start, daemon=True)
     webui_thread.start()
     logging.info("Initialized Modules...")
@@ -219,7 +219,7 @@ def command_handler(packet):
             # Get all nodes active last few minutes from the database and format the return message
             msg = "Recent users:\n"
             nodesAct = Query()
-            future_time = datetime.now() - timedelta(minutes=config.get('active_users', 10))
+            future_time = datetime.now() - timedelta(seconds=int(config.get('active_users', 60)))
             formatted = future_time.strftime('%Y%m%d_%H%M%S')
             results = NodeActivities.search(nodesAct.Time_Heard >= formatted)
             unique_nums = list({entry['Num'] for entry in results if 'Num' in entry})
@@ -244,8 +244,8 @@ def command_handler(packet):
 
             theTools = general_tools.general()
             distance = theTools.get_distance(
-                            config.get('repeatar_lat', 0.0),
-                            config.get('repeatar_lon', 0.0),
+                            float(config.get('repeatar_lat', 0.0)),
+                            float(config.get('repeatar_lon', 0.0)),
                             lat2, 
                             lon2)
             return f"Your distance from repeater: {round(distance,2)} km"

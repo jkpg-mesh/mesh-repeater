@@ -4,11 +4,69 @@
     <meta charset="UTF-8">
     <title>Setup Page</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 2rem; }
-        .container { max-width: 600px; margin: auto; }
-        .flash-success { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        textarea { width: 100%; padding: 0.5rem; margin-top: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
-        input[type="submit"] { padding: 0.8rem 1.5rem; font-weight: bold; color: white; background-color: #007bff; border: none; border-radius: 4px; cursor: pointer; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 2rem;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+        }
+        .nav-link {
+            display: inline-block;
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .nav-link:hover {
+            background-color: #0056b3;
+        }
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            resize: vertical;
+            margin-top: 0.5rem;
+        }
+        label {
+            display: block;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+        .flash-error, .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -24,9 +82,9 @@
         {% endwith %}
 
         <form method="post">
-            <label for="broadcast_message"><b>Broadcast Message:</b></label>
+            <label for="broadcast_message">Broadcast Message:</label>
             <textarea name="broadcast_message" id="broadcast_message" rows="4">{{ current_message }}</textarea>
-            <input type="submit" value="Save">
+            <p><input type="submit" value="Save" class="nav-link"></p>
         </form>
     </div>
 </body>

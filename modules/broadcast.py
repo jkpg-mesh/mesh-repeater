@@ -9,13 +9,13 @@ class broadcast:
         :param msg: The message to broadcast. Default is "Hello Jönköping!"
         """
         self.interface = interface
-        self.broadcast_freq = freq
+        self.broadcast_freq = int(freq)
         self.broadcast_msg = msg
         self.status = False
         self.Duty_cycle = 0.0
         self.emergancy_status = False
         self.emergancy_msg = ""
-        self.emergancy_freq = freq
+        self.emergancy_freq = int(freq)
 
     def run(self):
         """ 

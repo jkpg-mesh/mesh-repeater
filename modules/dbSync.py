@@ -9,7 +9,7 @@ class dbsync:
     def __init__(self, nodesdb=None, interface=None, freq=43200):
         self.nodesdb = nodesdb
         self.interface = interface
-        self.freq = freq
+        self.freq = int(freq)
         self.status = False
 
     def run(self):

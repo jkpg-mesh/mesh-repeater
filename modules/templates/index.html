@@ -25,6 +25,9 @@
                 <li><strong>Long Name:</strong> <span>{{ info.user.longName }}</span></li>
                 <li><strong>Short Name:</strong> <span>{{ info.user.shortName }}</span></li>
                 <li><strong>Hardware Model:</strong> <span>{{ info.user.hwModel }}</span></li>
+                <li><strong>Channel Utilization:</strong> <span>{{ info.deviceMetrics.channelUtilization | round(2) }}</span></li>
+                <li><strong>Air Utilization TX:</strong> <span>{{ info.deviceMetrics.airUtilTx | round(2) }}</span></li>
+                <li><strong>Uptime (hours):</strong> <span>{{ (info.deviceMetrics.uptimeSeconds / 3600) | round(2) }}</span></li>
             </ul>
         {% else %}
             <p>Could not retrieve node information.</p>

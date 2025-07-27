@@ -2,11 +2,12 @@ import meshtastic.serial_interface
 from flask import Flask, render_template, request, flash, redirect, url_for
 
 class WebUI:
-    def __init__(self, interface: meshtastic.serial_interface.SerialInterface = None, nodesdb=None):
+    def __init__(self, interface: meshtastic.serial_interface.SerialInterface = None, nodesdb=None, config=None):
         """Initialize the WebUI."""
         self.app = None
         self.interface = interface
         self.nodesdb = nodesdb
+        self.config = config if config else {}
         self.site_settings = {
             'broadcast_message': 'This is the default broadcast message.'
         }
@@ -15,10 +16,11 @@ class WebUI:
     def initFlask(self):
         """Initialize the Flask application and register routes."""
         self.app = Flask(__name__)
-        self.app.config['SECRET_KEY'] = 'a-secure-random-string-is-best'
+        self.app.config['SECRET_KEY'] = '123456789'
+        self.app.config['TEMPLATES_AUTO_RELOAD'] = True
         self.app.add_url_rule("/", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=['GET', 'POST'])
-
+        
     def index(self):
         """Route for the main index page."""
         info = self.interface.getMyNodeInfo()
@@ -26,13 +28,24 @@ class WebUI:
 
     def setup(self):
         """Route for the setup page (handles GET and POST)."""
-        # This part need to updated to really update the information 
+        config_items = []
+        # Prepare config items with value and description
+        for key, value in self.config.items():
+            if not key.endswith('_desc'):
+                desc = self.config.get(f"{key}_desc", key)
+                config_items.append({'key': key, 'value': value, 'desc': desc})
+
         if request.method == 'POST':
-            new_message = request.form.get('broadcast_message')
-            self.site_settings['broadcast_message'] = new_message
-            flash('Broadcast message saved successfully! ✅', 'success')
+            # Update config values from form
+            for item in config_items:
+                new_val = request.form.get(item['key'])
+                if new_val is not None:
+                    self.config[item['key']] = new_val
+            flash('Configuration updated successfully! ✅', 'success')
+            # Optionally, save config to file here
             return redirect(url_for('setup'))
-        return render_template('setup.html', current_message=self.site_settings['broadcast_message'])
+
+        return render_template('setup.html', config_items=config_items)
 
     def start(self):
         """Start the WebUI server thread."""
