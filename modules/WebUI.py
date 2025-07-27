@@ -2,15 +2,19 @@ import meshtastic.serial_interface
 from flask import Flask, render_template, request, flash, redirect, url_for
 
 class WebUI:
-    def __init__(self, interface: meshtastic.serial_interface.SerialInterface = None, nodesdb=None, config=None):
+    def __init__(self, 
+                 interface: meshtastic.serial_interface.SerialInterface = None, 
+                 nodesdb=None, 
+                 Activity=None,
+                 logfiles = None, 
+                 config=None):
         """Initialize the WebUI."""
         self.app = None
         self.interface = interface
         self.nodesdb = nodesdb
+        self.nodeactivity = Activity
+        self.logfiles = logfiles
         self.config = config if config else {}
-        self.site_settings = {
-            'broadcast_message': 'This is the default broadcast message.'
-        }
         self.initFlask()
 
     def initFlask(self):
@@ -20,6 +24,9 @@ class WebUI:
         self.app.config['TEMPLATES_AUTO_RELOAD'] = True
         self.app.add_url_rule("/", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=['GET', 'POST'])
+        self.app.add_url_rule("/nodes", "nodes", self.nodes)
+        self.app.add_url_rule("/activity", "activity", self.activity)
+        self.app.add_url_rule("/logfile", "logfile", self.logfile)
         
     def index(self):
         """Route for the main index page."""
@@ -47,8 +54,34 @@ class WebUI:
 
         return render_template('setup.html', config_items=config_items)
 
+    def nodes(self):
+        """
+        Route for the nodes page.
+        Retrieves all nodes from the database and renders them in the template.
+        """
+        nodes = self.nodesdb.all()
+        return render_template('nodes.html', nodes=nodes)
+    
+    def activity(self):
+        """
+        Route for the activity page.
+        Retrieves all node activities from the database and renders them in the template.
+        """
+        activities = self.nodeactivity.all()
+        return render_template('activity.html', activity=activities)
+    
+    def logfile(self):
+        """Route for the logfile page.
+        Reads the log file and renders its content in the template.
+        """
+        with open(self.logfiles, 'r') as file:
+            log_content = file.read()
+        return render_template('logfile.html', info=log_content)
+    
     def start(self):
-        """Start the WebUI server thread."""
+        """Start the WebUI server thread.
+        This method runs the Flask app in a separate thread.
+        """
         try:
             self.app.run(debug=False, host='0.0.0.0', port=5000)
         except Exception as e:

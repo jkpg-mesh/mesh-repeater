@@ -1,21 +1,17 @@
 import time
 
 class broadcast:
-    def __init__(self,interface=None, freq=300, msg="Hello Jönköping!"):
+    def __init__(self,interface=None, config=None):
         """
         This class handles broadcasting messages to all nodes in the network.
         :param interface: The interface to send messages through.
-        :param freq: Frequency of broadcasting messages in seconds. Default is 300 seconds (5 minutes).
-        :param msg: The message to broadcast. Default is "Hello Jönköping!"
+        :param config: Configuration dictionary containing broadcast settings.
         """
         self.interface = interface
-        self.broadcast_freq = int(freq)
-        self.broadcast_msg = msg
+        self.config = config
         self.status = False
         self.Duty_cycle = 0.0
         self.emergancy_status = False
-        self.emergancy_msg = ""
-        self.emergancy_freq = int(freq)
 
     def run(self):
         """ 
@@ -25,24 +21,24 @@ class broadcast:
         self.status = True
         counter = 0
         while self.status:
-            if self.emergancy_status == False:
-                if counter>self.broadcast_freq:
-                    self.Duty_cycle = self.calculate_duty_cycle()
-                    if self.Duty_cycle <= 3.0:
+            if (self.config.get('broadcast_on')=='Enable'):
+                if self.emergancy_status == False:
+                    if counter>int(self.config.get('broadcast_freq', 300)):
+                        self.Duty_cycle = self.calculate_duty_cycle()
+                        if self.Duty_cycle <= 3.0:
+                            # broadcast message to all nodes
+                            self.interface.sendText(text=self.config.get('broadcast_message', "Hello Jönköping!"), destinationId='^all')
+                            counter=0
+                        else:
+                            counter = counter - 60  # Reduce counter by 60 (i.e., reduce wait time by 60 seconds) if duty cycle is high
+                    counter += 1
+                elif self.emergancy_status == True:
+                    if counter>int(self.config.get('emergancy_freq', 300)):
                         # broadcast message to all nodes
-                        self.interface.sendText(text=self.broadcast_msg, destinationId='^all')
+                        self.interface.sendText(text=self.config.get('emergancy_message', "Error"), destinationId='^all')
                         counter=0
-                    else:
-                        counter = counter - 60  # Reduce counter by 60 seconds if duty cycle is high
-                counter += 1
-                time.sleep(1)
-            elif self.emergancy_status == True:
-                if counter>self.emergancy_freq:
-                    # broadcast message to all nodes
-                    self.interface.sendText(text=self.emergancy_msg, destinationId='^all')
-                    counter=0
-                counter += 1
-                time.sleep(1)
+                    counter += 1
+            time.sleep(1)
 
     def stop(self):
         """
@@ -67,6 +63,8 @@ class broadcast:
         local_node = self.interface.nodes.get(self.numToHex(node_num=my_node_num), {})
         metrics = local_node.get("deviceMetrics", {})
         duty_cycle = metrics.get("airUtilTx")
+        if duty_cycle is None:
+            return 0.0
         return float(duty_cycle)
 
     def start_emergency(self, msg, freq=60):

@@ -11,7 +11,11 @@
     "broadcast_on_desc": "Enable or Disable broadcasting",
     "broadcast_on": "Enable",
     "broadcast_message_desc": "Message to broadcast",
-    "broadcast_message": "Good day to J\u00f6nk\u00f6ping! This is an experimental beacon.  For more information visit https://jkpg-mesh.github.io/ or type /info",
+    "broadcast_message": "Welcome to J\u00f6nk\u00f6ping! This is an experimental beacon.  For more information visit https://jkpg-mesh.github.io/ or type /info",
     "broadcast_freq_desc": "Frequency in seconds to broadcast the message",
-    "broadcast_freq": "300"
+    "broadcast_freq": "300",
+    "emergancy_message_desc": "Emergency message to broadcast",
+    "emergancy_message": "Emergency! This is an emergency message.",
+    "emergancy_freq_desc": "Frequency in seconds to broadcast the emergency message",
+    "emergancy_freq": "120"
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Activity Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Node Activity Log</h1>
+
+        <div class="scroll-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Num</th>
+                        <th>ID</th>
+                        <th>Time Heard</th>
+                        <th>Activity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in activity %}
+                        <tr>
+                            <td>{{ item['Num'] }}</td>
+                            <td>{{ item['id'] }}</td>
+                            <td>{{ item['Time_Heard'] }}</td>
+                            <td>{{ item['Activity'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="nav-container">
+            <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+            <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
+            <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+        </div>
+    </div>
+</body>
+</html>

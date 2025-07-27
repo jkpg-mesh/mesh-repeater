@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log Files</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📁 Log File Viewer</h1>
+
+        <div class="log-container">
+            <pre>{{ info }}</pre>
+        </div>
+
+        <div class="nav-container">
+            <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+            <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
+            <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+        </div>
+    </div>
+</body>
+</html>

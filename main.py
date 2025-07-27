@@ -17,7 +17,7 @@ last heard is controlled by the repeater app.
 """
 
 import json, logging, os, threading, time
-import meshtastic, meshtastic.serial_interface
+import meshtastic.serial_interface
 from datetime import datetime, timedelta
 from tinydb import TinyDB, Query
 from pubsub import pub
@@ -72,7 +72,8 @@ def numToHex(node_num):
 
 # init the logging function
 def init_logging():
-    log_filename = f"logs/mesh_helper_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    global log_filename
+    log_filename = f"logs/app_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     logging.basicConfig(filename=log_filename, level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
     logging.info("Initialized logging...")
@@ -119,7 +120,9 @@ def init_db():
     Nodes = db.table('Nodes')
     NodeActivities = db.table('NodeActivities')
 
-    sync_now = dbSync.dbsync(nodesdb=Nodes, interface=interface)
+    sync_now = dbSync.dbsync(interface=interface,
+                             config=config,
+                             nodesdb=Nodes)
     sync_now.now()
     
     logging.info("Initialized Nodedb...")
@@ -171,13 +174,20 @@ def upsert_nodedb_activity(packet):
 # init thr additional modules
 def init_modules():
     global broadcaster, syncer
-    syncer = dbSync.dbsync(nodesdb=Nodes, interface=interface, freq=int(config.get('sync_frequency', 7200)))
+    syncer = dbSync.dbsync(interface=interface,
+                           config=config, 
+                           nodesdb=Nodes)
     thread1 = threading.Thread(target=syncer.run, daemon=True)
     thread1.start()
-    broadcaster = broadcast.broadcast(interface=interface, freq=int(config.get('broadcast_freq', 300)), msg=config.get('broadcast_message', "Hello Jönköping!"))
+    broadcaster = broadcast.broadcast(interface=interface, 
+                                      config=config)
     thread2 = threading.Thread(target=broadcaster.run, daemon=True)
     thread2.start()
-    webui = WebUI.WebUI(interface=interface, nodesdb=Nodes, config=config)
+    webui = WebUI.WebUI(interface=interface,
+                        config=config, 
+                        nodesdb=Nodes, 
+                        Activity=NodeActivities,
+                        logfiles=log_filename)
     webui_thread = threading.Thread(target=webui.start, daemon=True)
     webui_thread.start()
     logging.info("Initialized Modules...")

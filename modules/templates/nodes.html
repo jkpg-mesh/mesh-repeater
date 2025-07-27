@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nodes Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Node List</h1>
+
+        <div class="scroll-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Num</th>
+                        <th>ID</th>
+                        <th>Long Name</th>
+                        <th>Short Name</th>
+                        <th>MAC Address</th>
+                        <th>Hardware Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in nodes %}
+                        <tr>
+                            <td>{{ item['num'] }}</td>
+                            <td>{{ item['id'] }}</td>
+                            <td>{{ item.get('longName', '—') }}</td>
+                            <td>{{ item.get('shortName', '—') }}</td>
+                            <td>{{ item.get('macaddr', '—') }}</td>
+                            <td>{{ item.get('hwModel', item.get('HarhwModel', '—')) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="nav-container">
+            <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+            <a href="{{ url_for('activity') }}" class="nav-link">Activity 📊</a>
+            <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+        </div>
+    </div>
+</body>
+</html>
