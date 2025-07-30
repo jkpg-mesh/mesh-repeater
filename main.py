@@ -209,7 +209,8 @@ def command_handler(packet):
             msg = "Welcome to jkpg-mesh! Available commands:\n"
             msg = msg+ "/users - online users\n"
             msg = msg+ "/signal - get signal report\n"
-            msg = msg+ "Please wait 10sec before sending sending cmd."
+            msg = msg+ "/distance <lat> <lon> - /distance 57.7785 14.1697\n"
+            msg = msg+ "Please wait 10sec before sending next cmd."
             return msg
         case "/signal":
             # extract rssi and snr from packet and formats return message
