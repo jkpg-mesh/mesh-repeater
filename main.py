@@ -255,8 +255,8 @@ def command_handler(packet):
 
             theTools = general_tools.general()
             distance = theTools.get_distance(
-                            float(config.get('repeatar_lat', 0.0)),
-                            float(config.get('repeatar_lon', 0.0)),
+                            float(config.get('repeater_lat', 0.0)),
+                            float(config.get('repeater_lon', 0.0)),
                             lat2, 
                             lon2)
             return f"Your distance from repeater: {round(distance,2)} km"
