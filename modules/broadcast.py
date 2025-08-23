@@ -59,15 +59,17 @@ class broadcast:
                     self.Duty_cycle = self.calculate_duty_cycle()
                     if self.Duty_cycle <= 3.0:
                         msg = self.config.get("broadcast_message", "Hello Jönköping!")
-                        met = self.shared_data.get_metdata()
-                        met_msg = (
-                            f"\n T1:{met['temp1']:.1f}C"
-                            f" T2:{met['temp2']:.1f}C"
-                            f" H:{met['humidity']:.1f}%"
-                            f" Pstat:{met['pressure_station']:.1f}hPa"
-                            f" Psea:{met['pressure_sea']:.1f}hPa"
-                        )
-                        msg += met_msg
+                        # Only add MET data if enabled in config
+                        if self.config.get("met_on", "Disabled") == "Enabled":
+                            met = self.shared_data.get_metdata()
+                            met_msg = (
+                                f"\n T1:{met['temp1']:.1f}C"
+                                f" T2:{met['temp2']:.1f}C"
+                                f" H:{met['humidity']:.1f}%"
+                                f" Pstat:{met['pressure_station']:.1f}hPa"
+                                f" Psea:{met['pressure_sea']:.1f}hPa"
+                            )
+                            msg += met_msg
                         freq = int(self.config.get("broadcast_freq", 300))
                         self.interface.sendText(text=msg, destinationId="^all")
                         self.shared_data.set_counter(freq)
