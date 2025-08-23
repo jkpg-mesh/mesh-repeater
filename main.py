@@ -26,9 +26,11 @@ from rich.panel import Panel
 from rich.text import Text
 from rich import box
 
+import modules.shared as SharedState
 import modules.dbSync as dbSync
 import modules.broadcast as broadcast
 import modules.WebUI as WebUI
+import modules.met as METService
 import tools.general as general_tools
 
 # startup dialog functions 
@@ -173,21 +175,29 @@ def upsert_nodedb_activity(packet):
 
 # init thr additional modules
 def init_modules():
-    global broadcaster, syncer
+    global broadcaster, syncer, MET, shared_data
+
+    # Create the shared state object
+    shared_data = SharedState.SharedState()
+    MET = METService.METService(logging=logging, shared_data=shared_data, config=config)
+    METService_thread = threading.Thread(target=MET.start, daemon=True)
+    METService_thread.start()
     syncer = dbSync.dbsync(interface=interface,
                            config=config, 
-                           nodesdb=Nodes)
-    thread1 = threading.Thread(target=syncer.run, daemon=True)
-    thread1.start()
+                           nodesdb=Nodes,)
+    syncer_thread = threading.Thread(target=syncer.run, daemon=True)
+    syncer_thread.start()
     broadcaster = broadcast.broadcast(interface=interface, 
-                                      config=config)
-    thread2 = threading.Thread(target=broadcaster.run, daemon=True)
-    thread2.start()
+                                      config=config,
+                                      shared_data=shared_data)
+    broadcast_thread = threading.Thread(target=broadcaster.run, daemon=True)
+    broadcast_thread.start()
     webui = WebUI.WebUI(interface=interface,
                         config=config, 
                         nodesdb=Nodes, 
                         Activity=NodeActivities,
-                        logfiles=log_filename)
+                        logfiles=log_filename,
+                        shared_data=shared_data)
     webui_thread = threading.Thread(target=webui.start, daemon=True)
     webui_thread.start()
     logging.info("Initialized Modules...")

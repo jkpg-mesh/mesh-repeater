@@ -7,7 +7,8 @@ class WebUI:
                  nodesdb=None, 
                  Activity=None,
                  logfiles = None, 
-                 config=None):
+                 config=None,
+                 shared_data=None):
         """Initialize the WebUI."""
         self.app = None
         self.interface = interface
@@ -15,6 +16,7 @@ class WebUI:
         self.nodeactivity = Activity
         self.logfiles = logfiles
         self.config = config if config else {}
+        self.shared_data = shared_data
         self.initFlask()
 
     def initFlask(self):
@@ -31,7 +33,12 @@ class WebUI:
     def index(self):
         """Route for the main index page."""
         info = self.interface.getMyNodeInfo()
-        return render_template('index.html', info=info)
+        return render_template('index.html', 
+                               info=info, 
+                               reload_seconds=self.shared_data.get_counter(),
+                               broadcast=self.config.get('broadcast_on', 'Disabled'),
+                               emergency=self.config.get('emergency_on', 'Disabled'),
+                               METdata=self.shared_data.get_metdata())
 
     def setup(self):
         """Route for the setup page (handles GET and POST)."""

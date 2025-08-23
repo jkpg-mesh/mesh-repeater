@@ -18,9 +18,25 @@
                 <li><strong>Channel Utilization:</strong> <span>{{ info.deviceMetrics.channelUtilization | round(2) }}</span></li>
                 <li><strong>Air Utilization TX:</strong> <span>{{ info.deviceMetrics.airUtilTx | round(2) }}</span></li>
                 <li><strong>Uptime (hours):</strong> <span>{{ (info.deviceMetrics.uptimeSeconds / 3600) | round(2) }}</span></li>
+                <li><strong>Temp AHT20:</strong> <span>{{ METdata.temp1|round(0, 'common') }} °C</span></li>
+                <li><strong>Temp BMP280:</strong> <span>{{ METdata.temp2|round(0, 'common') }} °C</span></li>
+                <li><strong>Humidity AHT20:</strong> <span>{{ METdata.humidity|round(0, 'common') }} %</span></li>
+                <li><strong>Pressure Station BMP280:</strong> <span>{{ METdata.pressure_station|round(1, 'common') }} hPa</span></li>
+                <li><strong>Pressure Sea BMP280:</strong> <span>{{ METdata.pressure_sea|round(1, 'common') }} hPa</span></li>
             </ul>
         {% else %}
             <p>Could not retrieve node information.</p>
+        {% endif %}
+
+        <!-- Countdown Timer -->
+        {% if broadcast == "Enabled" %}
+            <div id="countdownBox" class="countdown {% if emergency == "Enabled" %}emergency{% endif %}">
+                {% if emergency == "Enabled" %}
+                    🚨 Emergency broadcast in <span id="countdown">{{ reload_seconds }}</span> seconds
+                {% else %}
+                    🔊 Next message broadcast in <span id="countdown">{{ reload_seconds }}</span> seconds
+                {% endif %}
+            </div>
         {% endif %}
 
         <div class="nav-container">
@@ -30,5 +46,22 @@
             <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
         </div>
     </div>
+
+    {% if broadcast == "Enabled" %}
+    <script>
+        let seconds = parseInt(document.getElementById("countdown").textContent);
+        const countdownElement = document.getElementById("countdown");
+
+        const interval = setInterval(() => {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+                clearInterval(interval);
+                location.reload();
+            }
+        }, 1000);
+    </script>
+    {% endif %}
 </body>
 </html>

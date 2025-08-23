@@ -1,3 +1,4 @@
 test*.py
 temp*.txt
 **/__pycache__/
+*.log

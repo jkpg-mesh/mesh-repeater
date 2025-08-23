@@ -3,3 +3,7 @@ tinydb
 rich
 pubsub
 flask
+geopy
+adafruit-circuitpython-ahtx0
+adafruit-circuitpython-bmp280
+adafruit-blinka
