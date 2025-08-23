@@ -27,5 +27,7 @@
     "met_interval_desc": "Interval in seconds to fetch MET data",
     "met_interval": "30",
     "met_logging_desc": "Enabled or Disabled logging MET data to a file",
-    "met_logging": "Disabled"
+    "met_logging": "Disabled",
+    "zimezone_desc": "Timezone for beacon setup",
+    "timezone": "Europe/Paris"
 }

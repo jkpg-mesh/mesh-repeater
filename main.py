@@ -19,6 +19,7 @@ last heard is controlled by the repeater app.
 import json, logging, os, threading, time
 import meshtastic.serial_interface
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from tinydb import TinyDB, Query
 from pubsub import pub
 from rich.console import Console
@@ -353,6 +354,14 @@ def init_meshunit():
 
         #Used to check if connected to serial device
         myLongName = interface.getLongName()
+        # Get the local node
+        local_node = interface.localNode
+        # Get Stockholm local time as a Unix timestamp
+        mytimezone = ZoneInfo(config.get("timezone","Europe/Paris"))
+        current_time = int(datetime.now(mytimezone).timestamp())
+        # Use the setTime method
+        local_node.setTime(current_time)
+        
         console.print(f"[bold green]✔[/bold green]  Initialized Meshtastic interface...")
 
         # Subscribe to Meshtastic events
