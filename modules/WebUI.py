@@ -1,3 +1,4 @@
+import logging
 import meshtastic.serial_interface
 from flask import Flask, render_template, request, flash, redirect, url_for
 
@@ -24,11 +25,39 @@ class WebUI:
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = '123456789'
         self.app.config['TEMPLATES_AUTO_RELOAD'] = True
+        self.app.logger.setLevel('ERROR')  # Suppress Flask startup messages
+
+        # Suppress Werkzeug request logs
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
+
         self.app.add_url_rule("/", "index", self.index)
         self.app.add_url_rule("/setup", "setup", self.setup, methods=['GET', 'POST'])
         self.app.add_url_rule("/nodes", "nodes", self.nodes)
         self.app.add_url_rule("/activity", "activity", self.activity)
         self.app.add_url_rule("/logfile", "logfile", self.logfile)
+        self.app.add_url_rule("/weather", "weather", self.weather)
+
+    def weather(self):
+        """
+        Route for the weather page. Reads MET data log and passes it to the template for graphing.
+        """
+        import os, json
+        met_log_path = os.path.join("logs", "met_data.jsonl")
+        met_data = []
+        try:
+            with open(met_log_path, "r") as f:
+                for line in f:
+                    try:
+                        entry = json.loads(line)
+                        met_data.append(entry)
+                    except Exception:
+                        continue
+        except Exception as e:
+            met_data = []
+        # Sort by timestamp just in case
+        met_data.sort(key=lambda x: x.get("timestamp", 0))
+        return render_template('weather.html', met_data=met_data)
         
     def index(self):
         """Route for the main index page."""

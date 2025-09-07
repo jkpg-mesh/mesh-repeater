@@ -44,24 +44,33 @@
             <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
             <a href="{{ url_for('activity') }}" class="nav-link">Activity 📊</a>
             <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather 🌤️</a>
         </div>
     </div>
 
     {% if broadcast == "Enabled" %}
     <script>
-        let seconds = parseInt(document.getElementById("countdown").textContent);
         const countdownElement = document.getElementById("countdown");
+        let seconds = parseInt(countdownElement.textContent);
 
-        const interval = setInterval(() => {
-            seconds--;
-            countdownElement.textContent = seconds;
+        // Calculate the target end time
+        const endTime = Date.now() + seconds * 1000;
 
-            if (seconds <= 0) {
-                clearInterval(interval);
+        function updateCountdown() {
+            const remaining = Math.round((endTime - Date.now()) / 1000);
+            countdownElement.textContent = remaining > 0 ? remaining : 0;
+
+            if (remaining <= 0) {
                 location.reload();
+            } else {
+                requestAnimationFrame(updateCountdown);
             }
-        }, 1000);
+        }
+
+        // Start the countdown
+        updateCountdown();
     </script>
+
     {% endif %}
 </body>
 </html>

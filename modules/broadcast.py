@@ -12,6 +12,7 @@ class broadcast:
         self.status = False
         self.Duty_cycle = 0.0
         self.shared_data = shared_data
+        self.baseC = 0
 
     def run(self):
         """ 
@@ -20,6 +21,7 @@ class broadcast:
         """
         self.status = True
         self.shared_data.set_counter(int(self.config.get('broadcast_freq', 300)))
+        self.baseC = self.config.get('broadcast_freq', 300)
 
         last_emergency_state = False  # Track previous state
 
@@ -27,6 +29,10 @@ class broadcast:
             if self.config.get("broadcast_on") != "Enabled":
                 time.sleep(1)
                 continue
+            
+            if self.baseC != self.config.get('broadcast_freq', 300):
+                self.baseC = self.config.get('broadcast_freq', 300)
+                self.shared_data.set_counter(int(self.config.get('broadcast_freq', 300)))
 
             counter = self.shared_data.get_counter()
             emergency_on = self.config.get("emergency_on") == "Enabled"

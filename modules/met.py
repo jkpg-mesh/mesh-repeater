@@ -91,6 +91,23 @@ class METService:
                     humidity=rh
                 )
 
+                # Log MET data to file in JSON lines format for graphing
+                try:
+                    import json
+                    log_path = "logs/met_data.jsonl"
+                    entry = {
+                        "timestamp": int(time.time()),
+                        "temp1": t_aht,
+                        "temp2": t_bmp,
+                        "pressure_station": p_station,
+                        "pressure_sea": p_sea,
+                        "humidity": rh
+                    }
+                    with open(log_path, "a") as f:
+                        f.write(json.dumps(entry) + "\n")
+                except Exception as log_exc:
+                    self.logging.error(f"Failed to log MET data: {log_exc}")
+
                 if self.config.get("met_logging", "Disabled") == "Enabled":
                     self.logging.info(f"AHT20 Temp: {t_aht:.2f} °C Humidity: {rh:.1f}%")
                     self.logging.info(f"BMP280 Temp: {t_bmp:.2f} °C Station Pressure: {p_station:.2f} hPa Sea-level: {p_sea:.2f} hPa")

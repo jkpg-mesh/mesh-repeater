@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+    <script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Weather Data Graph</h1>
+        <div class="scroll-table" style="width:100%;">
+            <canvas id="metChart" height="340" style="display:block;width:100%;max-width:100%;margin:0 auto;"></canvas>
+        </div>
+        <div class="nav-container">
+            <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+            <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
+            <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('activity') }}" class="nav-link">Activity 📋</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+        </div>
+    </div>
+    <script>
+        // Prepare data from Flask
+        const metData = {{ met_data|tojson }};
+        const labels = metData.map(e => new Date(e.timestamp * 1000).toLocaleString());
+        const temp1 = metData.map(e => e.temp1);
+        const temp2 = metData.map(e => e.temp2);
+        const pressure = metData.map(e => e.pressure_station);
+        const humidity = metData.map(e => e.humidity);
+
+        const ctx = document.getElementById('metChart').getContext('2d');
+        const metChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'AHT Temp (°C)',
+                        data: temp1,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        yAxisID: 'y',
+                        tension: 0.2
+                    },
+                    {
+                        label: 'BMP Temp (°C)',
+                        data: temp2,
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        yAxisID: 'y',
+                        tension: 0.2
+                    },
+                    {
+                        label: 'Pressure (hPa)',
+                        data: pressure,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        yAxisID: 'y1',
+                        tension: 0.2
+                    },
+                    {
+                        label: 'Humidity (%)',
+                        data: humidity,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        yAxisID: 'y2',
+                        tension: 0.2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                stacked: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'MET Sensor Data Over Time' }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Temperature (°C)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Pressure (hPa)' }
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: false,
+                        position: 'right',
+                        title: { display: true, text: 'Humidity (%)' },
+                        min: 0,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
