@@ -28,6 +28,12 @@
     "met_interval": "30",
     "met_logging_desc": "Enabled or Disabled logging MET data to a file",
     "met_logging": "Disabled",
+    "gps_on_desc": "Enabled or Disabled GPS functionality",
+    "gps_on": "Disabled",
+    "gps_port_desc": "Serial port for the GPS module",
+    "gps_port": "/dev/ttyAMA0",
+    "gps_baudrate_desc": "Baudrate for the GPS module",
+    "gps_baudrate": "9600",
     "zimezone_desc": "Timezone for beacon setup",
     "timezone": "Europe/Paris"
 }

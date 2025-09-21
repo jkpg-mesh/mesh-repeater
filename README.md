@@ -12,14 +12,29 @@ It helps the community by serving as a stable, always-on node that announces its
 
 ![Terminal output](assets/main.png)
 
+
 ### Key Features
-- **Beacon Functionality:** Periodically broadcasts a customizable message to the mesh.
+- **Beacon Functionality:** Periodically broadcasts a customizable message to the mesh, with emergency broadcast support and MET sensor integration.
 - **Node Database:** Stores extended node info and recent activity beyond the device’s built-in limits.
-- **Web UI:** Optional web interface for viewing active nodes and network status.
+- **Web UI:** Modern web interface for viewing active nodes, network status, weather sensor data, and live GPS location.
+- **Live GPS Page:** New GPS page shows near-realtime location, updated every second.
 - **Command Handling:** Responds to basic commands (e.g., `/info`, `/users`, `/signal`, `/distance`) sent via Meshtastic text messages.
 - **Extensible:** Easily add new modules or features.
 
 ![Webinterface](assets/webui.png)
+
+## Web UI Pages
+
+- **Home:** Node status and broadcast info.
+- **Setup:** Configuration options.
+- **Nodes:** List of all nodes in the mesh.
+- **Activity:** Node activity log.
+- **Log Files:** View system logs.
+- **Weather:** Graphs of MET sensor data (temperature, humidity, pressure).
+- **GPS:** Live GPS location, updated every second.
+- **Messages:** View and manage broadcast messages, including regular and emergency messages sent to the mesh network. Messages may include MET sensor data if enabled.
+
+All pages now include navigation links to every other section, including the new GPS page.
 
 
 ## Requirements
@@ -48,7 +63,8 @@ It helps the community by serving as a stable, always-on node that announces its
    ```
    python main.py
    ```
-4. Access the web interface (if enabled) for node status and activity.
+4. Access the web interface at `http://localhost:5000` (or your device’s IP) for node status, activity, weather, and GPS.
+
 
 
 ## MET Data (Weather Sensor Support)
@@ -58,6 +74,7 @@ This project supports reading environmental data (temperature, humidity, and pre
 **Required Hardware:**
 - AHT20 (temperature/humidity sensor)
 - BMP280 (pressure/temperature sensor)
+- GPS Module NEO6MV2 (or similar)
 - Raspberry Pi or compatible device with I2C enabled
 
 **Setup:**
@@ -81,6 +98,7 @@ This project supports reading environmental data (temperature, humidity, and pre
 - This utility is intended as a **beacon** or “anchor” node, not a message repeater.
 - Node activity and user presence are tracked in a local database for improved visibility.
 - Configuration options are available in `config/config.json`.
+- GPS data is shown live in the web interface and can be extended to use real hardware.
 
 ---
 

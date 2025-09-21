@@ -30,8 +30,9 @@ from rich import box
 import modules.shared as SharedState
 import modules.dbSync as dbSync
 import modules.broadcast as broadcast
-import modules.WebUI as WebUI
 import modules.met as METService
+import modules.mygps as mygps
+import modules.WebUI as WebUI
 import tools.general as general_tools
 
 # startup dialog functions 
@@ -178,29 +179,51 @@ def upsert_nodedb_activity(packet):
 def init_modules():
     global broadcaster, syncer, MET, shared_data
 
-    # Create the shared state object
     shared_data = SharedState.SharedState()
-    MET = METService.METService(logging=logging, shared_data=shared_data, config=config)
-    METService_thread = threading.Thread(target=MET.start, daemon=True)
+
+    # Start the MET service thread
+    MET = METService.METService(logging=logging, 
+                                shared_data=shared_data, 
+                                config=config)
+    METService_thread = threading.Thread(target=MET.start, 
+                                         daemon=True)
     METService_thread.start()
+
+    # Start the GPS service thread
+    gps = mygps.mygps(logging=logging, 
+                      shared_data=shared_data, 
+                      config=config)
+    mygps_thread = threading.Thread(target=gps.start, 
+                                    daemon=True)
+    mygps_thread.start()    
+
+    # Start the DB sync thread
     syncer = dbSync.dbsync(interface=interface,
                            config=config, 
-                           nodesdb=Nodes,)
-    syncer_thread = threading.Thread(target=syncer.run, daemon=True)
+                           nodesdb=Nodes,)    
+    syncer_thread = threading.Thread(target=syncer.run, 
+                                     daemon=True)
     syncer_thread.start()
+
+    # Start the broadcast thread
     broadcaster = broadcast.broadcast(interface=interface, 
                                       config=config,
                                       shared_data=shared_data)
-    broadcast_thread = threading.Thread(target=broadcaster.run, daemon=True)
+    broadcast_thread = threading.Thread(target=broadcaster.run, 
+                                        daemon=True)
     broadcast_thread.start()
+
+    # Start the web UI thread
     webui = WebUI.WebUI(interface=interface,
                         config=config, 
                         nodesdb=Nodes, 
                         Activity=NodeActivities,
                         logfiles=log_filename,
                         shared_data=shared_data)
-    webui_thread = threading.Thread(target=webui.start, daemon=True)
+    webui_thread = threading.Thread(target=webui.start, 
+                                    daemon=True)
     webui_thread.start()
+
     logging.info("Initialized Modules...")
     console.print(f"[bold green]✔[/bold green]  Initialized Modules...")
 
@@ -295,6 +318,7 @@ def onReceive(packet, interface):
             case "TEXT_MESSAGE_APP":
                 fromId = packet['fromId']
                 body = packet['decoded']['text']
+                shared_data.add_message(fromId, body)
                 logging.debug(f"Text package message: {body}")
                 upsert_nodedb_activity(packet)
                 msg = command_handler(packet)
@@ -384,7 +408,7 @@ def init_meshunit():
         console.print(f"[bold red]❌[/bold red]  Meshtastic function started...")
         MeshError = str(e)
 
-# mani function
+# main function
 def main():
     init_startup_screen()
     init_logging()

@@ -24,7 +24,11 @@ class METService:
         self.bmp280 = None
 
     def _init_sensors(self):
-        """Initialize I2C bus and sensors dynamically."""
+        """
+        Initialize I2C bus and sensors dynamically.
+        Returns:
+            bool: True if sensors initialized successfully, False otherwise.
+        """
         try:
             self.i2c = busio.I2C(board.SCL, board.SDA)
             self.aht20 = adafruit_ahtx0.AHTx0(self.i2c)
@@ -45,7 +49,9 @@ class METService:
             return False
 
     def _cleanup_sensors(self):
-        """Cleanup sensors and release I2C resources."""
+        """
+        Cleanup sensors and release I2C resources.
+        """
         if self.aht20 or self.bmp280:
             self.logging.info("Cleaning up METService sensors")
         self.aht20 = None
@@ -65,7 +71,7 @@ class METService:
             elif not met_on and sensors_initialized:
                 self._cleanup_sensors()
                 sensors_initialized = False
-
+            # Skip reading if MET is disabled or sensors not initialized
             if not met_on or not sensors_initialized:
                 time.sleep(1)
                 continue

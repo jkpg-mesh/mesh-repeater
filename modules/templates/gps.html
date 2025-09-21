@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPS Data</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+    <script src="{{ url_for('static', filename='plotly-3.1.0.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🛰️ GPS Data (Live)</h1>
+
+        <!-- Text GPS info -->
+        <div id="gps-data" style="font-size:1.2em; margin-bottom:20px;">
+            Loading GPS data...
+        </div>
+
+        <!-- Skyplot Container -->
+        <div id="skyplot" style="width:500px; height:500px; margin:auto;"></div>
+
+        <!-- Navigation -->
+        <div class="nav-container">
+            <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+            <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
+            <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+            <a href="{{ url_for('activity') }}" class="nav-link">Activity 📋</a>
+            <a href="{{ url_for('weather') }}" class="nav-link">Weather 🌤️</a>
+            <a href="{{ url_for('messages') }}" class="nav-link">Messages 💬</a>
+            <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+        </div>
+    </div>
+
+    <script>
+        function updateSkyplot(satellites) {
+            let data = [];
+            const colors = { "GP": "rgba(54,162,235,1)", "BD": "rgba(255,99,132,1)" };
+            Object.keys(satellites).forEach(sys => {
+                let r = [], theta = [], text = [];
+                for (let s of Object.values(satellites[sys])) {
+                    let az = parseFloat(s.azimuth);
+                    let el = parseFloat(s.elevation);
+                    if (isNaN(az) || isNaN(el)) continue;
+                    r.push(90 - el);
+                    theta.push(az);
+                    text.push(`PRN ${s.prn} | Az: ${Math.round(az)}° | El: ${Math.round(el)}° | SNR: ${s.snr||""}`);
+                }
+                data.push({
+                    type: 'scatterpolar',
+                    r: r,
+                    theta: theta,
+                    mode: 'markers',
+                    marker: { color: colors[sys] || 'rgba(0,200,0,1)', size: 12 },
+                    name: sys,
+                    text: text,
+                    hoverinfo: 'text'
+                });
+            });
+
+            Plotly.newPlot('skyplot', data, {
+                polar: {
+                    radialaxis: { range: [0, 90], angle: 90, tickvals: [0,15,30,45,60,75,90], tickfont: { size: 12 } },
+                    angularaxis: { 
+                        rotation: 90,  // Rotate so 0° (North) is at top
+                        tickvals: [0,45,90,135,180,225,270,315],
+                        ticktext: ["N","NE","E","SE","S","SW","W","NW"],
+                        direction: "clockwise",
+                        tickfont: { size: 12 }
+                    }
+                },
+                legend: { orientation: 'h', x: 0.1, y: 1.1 },
+                margin: { t: 40, r: 40, b: 40, l: 40 }
+            }, { responsive: true });
+        }
+
+        function updateGPS() {
+            fetch('/gps')
+                .then(response => response.json())
+                .then(data => {
+                    let html;
+                    if (data.fix) {
+                        let latRounded = Number(data.latitude).toFixed(4);
+                        let lonRounded = Number(data.longitude).toFixed(4);
+                        html = `<b>Timestamp:</b> ${data.timestamp}<br>
+                                <b>Latitude:</b> ${latRounded}<br>
+                                <b>Longitude:</b> ${lonRounded}<br>
+                                <b>Altitude:</b> ${data.altitude} ${data.altitude_units}<br>`;
+                    } else {
+                        html = `<b>Timestamp:</b> ${data.timestamp}<br><b>Status:</b> No position fix`;
+                    }
+                    document.getElementById('gps-data').innerHTML = html;
+
+                    if (data.satellites) {
+                        updateSkyplot(data.satellites);
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('gps-data').innerHTML = 'Unable to fetch GPS data.';
+                });
+        }
+
+        // Update every second
+        setInterval(updateGPS, 1000);
+        updateGPS();
+    </script>
+</body>
+</html>

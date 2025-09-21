@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Messages</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='webui.css') }}">
+        <style>
+            .chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            height: 50vh;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+            }
+            .messages {
+                flex: 1;
+                padding: 10px;
+                overflow-y: auto;
+                background: #f9f9f9;
+            }
+            .msg {
+                margin: 5px 0;
+                padding: 8px 12px;
+                border-radius: 15px;
+                max-width: 80%;
+                clear: both;
+            }
+            .msg.me {
+                background: #d1e7dd;
+                float: right;
+            }
+            .msg.node {
+                background: #f8d7da;
+                float: left;
+            }
+            .input-area {
+                display: flex;
+                border-top: 1px solid #ccc;
+            }
+            .input-area input {
+                flex: 1;
+                padding: 10px;
+                border: none;
+                outline: none;
+            }
+            .input-area button {
+                padding: 10px 20px;
+                border: none;
+                background: #007bff;
+                color: white;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>💬 Messages</h2>
+            <div class="chat-container">
+                <div id="messages" class="messages"></div>
+                <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+            <!-- Navigation -->
+            <div class="nav-container">
+                <a href="{{ url_for('setup') }}" class="nav-link">Setup ⚙️</a>
+                <a href="{{ url_for('nodes') }}" class="nav-link">Nodes 🧭</a>
+                <a href="{{ url_for('logfile') }}" class="nav-link">Log Files 📁</a>
+                <a href="{{ url_for('activity') }}" class="nav-link">Activity 📋</a>
+                <a href="{{ url_for('weather') }}" class="nav-link">Weather 🌤️</a>
+                <a href="{{ url_for('gps_ui') }}" class="nav-link">GPS 🛰️</a>
+                <a href="{{ url_for('index') }}" class="nav-link">Home 🏠</a>
+            </div>
+        </div>
+        <script>
+            function fetchMessages() {
+            fetch('/get_messages')
+                .then(res => res.json())
+                .then(data => {
+                const container = document.getElementById('messages');
+                container.innerHTML = '';
+                data.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = 'msg ' + (m.from === 'me' ? 'me' : 'node');
+                    div.textContent = m.text;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+                });
+            }
+
+            function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const formData = new FormData();
+            formData.append('message', msg);
+            fetch('/send_message', { method: 'POST', body: formData })
+                .then(() => {
+                input.value = '';
+                fetchMessages();
+                });
+            }
+
+            setInterval(fetchMessages, 2000);
+            fetchMessages();
+        </script>
+    </body>
+</html>
